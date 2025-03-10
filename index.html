@@ -7,28 +7,36 @@
     <style>
         body { font-family: Arial, sans-serif; text-align: center; margin: 20px; }
         h1 { color: #333; }
-        #meals { margin-top: 20px; padding: 10px; border: 1px solid #ddd; border-radius: 5px; display: inline-block; text-align: left; }
+        #meals { margin-top: 20px; padding: 10px; border: 1px solid #ddd; border-radius: 5px; display: inline-block; text-align: left; padding: 15px; }
     </style>
 </head>
 <body>
+
     <div id="meals">불러오는 중...</div>
 
     <script>
-        function getToday() {
+        function getTodayInfo() {
             const today = new Date();
             const year = today.getFullYear();
             const month = String(today.getMonth() + 1).padStart(2, "0");
             const day = String(today.getDate()).padStart(2, "0");
-            return `${year}${month}${day}`;
+
+            const weekdays = ["일요일", "월요일", "화요일", "수요일", "목요일", "금요일", "토요일"];
+            const weekday = weekdays[today.getDay()]; // 요일 가져오기
+
+            return {
+                dateStr: `${year}년 ${month}월 ${day}일 (${weekday})`,
+                neisDate: `${year}${month}${day}`
+            };
         }
 
-        const today = getToday();
+        const { dateStr, neisDate } = getTodayInfo();
 
         const API_KEY = "25ab112985ae4d408a9ff59278a983ad";
         const ATPT_OFCDC_SC_CODE = "J10";  
         const SD_SCHUL_CODE = "7530102";  
 
-        const url = `https://open.neis.go.kr/hub/mealServiceDietInfo?KEY=${API_KEY}&Type=json&ATPT_OFCDC_SC_CODE=${ATPT_OFCDC_SC_CODE}&SD_SCHUL_CODE=${SD_SCHUL_CODE}&MLSV_YMD=${today}`;
+        const url = `https://open.neis.go.kr/hub/mealServiceDietInfo?KEY=${API_KEY}&Type=json&ATPT_OFCDC_SC_CODE=${ATPT_OFCDC_SC_CODE}&SD_SCHUL_CODE=${SD_SCHUL_CODE}&MLSV_YMD=${neisDate}`;
 
         fetch(url)
             .then(response => response.json())
@@ -36,18 +44,25 @@
                 const mealDiv = document.getElementById("meals");
                 try {
                     let meals = data["mealServiceDietInfo"][1]["row"];
-                    let htmlContent = `<h2>${today} 급식 정보</h2><hr>`;
+                    let htmlContent = `<h3>📅 ${dateStr} 급식 정보</h3><hr>`;  // 날짜는 급식 내부에서만 표시
                     meals.forEach(meal => {
-                        htmlContent += `<h3>${meal["MMEAL_SC_NM"]}</h3>`;
-                        htmlContent += `<p>${meal["DDISH_NM"].replace(/<br\/>/g, "<br>")}</p><hr>`;
+                        let menu = meal["DDISH_NM"]
+                            .replace(/<br\/>/g, "<br>")  // 줄바꿈 처리
+                            .replace(/\d+\./g, "")      // '1.', '2.' 같은 번호 제거
+                            .replace(/\([^)]*\)/g, "")  // 괄호 및 괄호 안의 내용 제거
+                            .replace(/고|자율|ㅡ|완/g, "") // '고', '자율', 'ㅡ', '완' 제거
+                            .replace(/\s+/g, " ")       // 공백 정리
+
+                        htmlContent += `<h3>🍽️ ${meal["MMEAL_SC_NM"]}</h3>`;
+                        htmlContent += `<p>${menu}</p><hr>`;
                     });
                     mealDiv.innerHTML = htmlContent;
                 } catch (error) {
-                    mealDiv.innerHTML = `<h2>${today} 급식 정보가 없습니다.</h2>`;
+                    mealDiv.innerHTML = `<h3>📅 ${dateStr} 급식 정보가 없습니다.</h3>`;
                 }
             })
             .catch(error => {
-                document.getElementById("meals").innerHTML = `<h2>급식 정보를 불러오는 중 오류가 발생했습니다.</h2>`;
+                document.getElementById("meals").innerHTML = `<h3>급식 정보를 불러오는 중 오류가 발생했습니다.</h3>`;
             });
     </script>
 </body>
