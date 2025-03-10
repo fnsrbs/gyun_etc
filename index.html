@@ -10,8 +10,7 @@
         #meals { margin-top: 20px; padding: 10px; border: 1px solid #ddd; border-radius: 5px; display: inline-block; text-align: left; }
     </style>
 </head>
-<body>
-    <h1>오늘의 급식 정보</h1>
+<body>   
     <div id="meals">불러오는 중...</div>
 
     <script>
@@ -35,7 +34,7 @@
                     let meals = data["mealServiceDietInfo"][1]["row"];
                     let htmlContent = `<h2>${today} 급식 정보</h2><hr>`;
                     meals.forEach(meal => {
-                        htmlContent += `<h3>${meal["MMEAL_SC_NM"]} (식사 종류)</h3>`;
+                        htmlContent += `<h3>${meal["MMEAL_SC_NM"]}</h3>`;
                         htmlContent += `<p>${meal["DDISH_NM"].replace(/<br\/>/g, "<br>")}</p><hr>`;
                     });
                     mealDiv.innerHTML = htmlContent;
