@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>학교 급식 정보</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; margin: 20px; }
+        h1 { color: #333; }
+        #meals { margin-top: 20px; padding: 10px; border: 1px solid #ddd; border-radius: 5px; display: inline-block; text-align: left; }
+    </style>
+</head>
+<body>
+    <h1>오늘의 급식 정보</h1>
+    <div id="meals">불러오는 중...</div>
+
+    <script>
+        // 오늘 날짜 자동 설정 (YYYYMMDD 형식)
+        const today = new Date().toISOString().split("T")[0].replace(/-/g, "");
+
+        // API 키 및 학교 정보 입력
+        const API_KEY = "25ab112985ae4d408a9ff59278a983ad";
+        const ATPT_OFCDC_SC_CODE = "J10";  // 교육청 코드
+        const SD_SCHUL_CODE = "7530102";   // 학교 코드
+
+        // API 요청 URL 생성
+        const url = `https://open.neis.go.kr/hub/mealServiceDietInfo?KEY=${API_KEY}&Type=json&ATPT_OFCDC_SC_CODE=${ATPT_OFCDC_SC_CODE}&SD_SCHUL_CODE=${SD_SCHUL_CODE}&MLSV_YMD=${today}`;
+
+        // 급식 데이터 가져오기
+        fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                const mealDiv = document.getElementById("meals");
+                try {
+                    let meals = data["mealServiceDietInfo"][1]["row"];
+                    let htmlContent = `<h2>${today} 급식 정보</h2><hr>`;
+                    meals.forEach(meal => {
+                        htmlContent += `<h3>${meal["MMEAL_SC_NM"]} (식사 종류)</h3>`;
+                        htmlContent += `<p>${meal["DDISH_NM"].replace(/<br\/>/g, "<br>")}</p><hr>`;
+                    });
+                    mealDiv.innerHTML = htmlContent;
+                } catch (error) {
+                    mealDiv.innerHTML = `<h2>${today} 급식 정보가 없습니다.</h2>`;
+                }
+            })
+            .catch(error => {
+                document.getElementById("meals").innerHTML = `<h2>급식 정보를 불러오는 중 오류가 발생했습니다.</h2>`;
+            });
+    </script>
+</body>
+</html>
