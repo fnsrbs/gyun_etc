@@ -3,29 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>학교 급식 정보</title>
+    <title>오늘의 급식 정보</title>
     <style>
         body { font-family: Arial, sans-serif; text-align: center; margin: 20px; }
         h1 { color: #333; }
         #meals { margin-top: 20px; padding: 10px; border: 1px solid #ddd; border-radius: 5px; display: inline-block; text-align: left; }
     </style>
 </head>
-<body>   
+<body>
     <div id="meals">불러오는 중...</div>
 
     <script>
-        // 오늘 날짜 자동 설정 (YYYYMMDD 형식)
-        const today = new Date().toISOString().split("T")[0].replace(/-/g, "");
+        function getToday() {
+            const today = new Date();
+            const year = today.getFullYear();
+            const month = String(today.getMonth() + 1).padStart(2, "0");
+            const day = String(today.getDate()).padStart(2, "0");
+            return `${year}${month}${day}`;
+        }
 
-        // API 키 및 학교 정보 입력
+        const today = getToday();
+
         const API_KEY = "25ab112985ae4d408a9ff59278a983ad";
-        const ATPT_OFCDC_SC_CODE = "J10";  // 교육청 코드
-        const SD_SCHUL_CODE = "7530102";   // 학교 코드
+        const ATPT_OFCDC_SC_CODE = "J10";  
+        const SD_SCHUL_CODE = "7530102";  
 
-        // API 요청 URL 생성
         const url = `https://open.neis.go.kr/hub/mealServiceDietInfo?KEY=${API_KEY}&Type=json&ATPT_OFCDC_SC_CODE=${ATPT_OFCDC_SC_CODE}&SD_SCHUL_CODE=${SD_SCHUL_CODE}&MLSV_YMD=${today}`;
 
-        // 급식 데이터 가져오기
         fetch(url)
             .then(response => response.json())
             .then(data => {
